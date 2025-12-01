@@ -24,6 +24,7 @@
             export FLAKE_ENV=1
 
             PS1='\[\033[35m\][\[\033[34m\]nix-flake\[\033[35m\]]\[\033[0m\] \w \$ '
+            composer setup
             export PATH="$PWD/vendor/bin:$PATH"
           '';
         };
