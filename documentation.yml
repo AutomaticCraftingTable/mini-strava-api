@@ -1,0 +1,473 @@
+openapi: 3.0.3
+info:
+  title: MiniStrava API
+  version: 1.0.0
+
+servers:
+  - url: https://api.ministrava.com
+
+paths:
+
+  /api/auth/register:
+    post:
+      summary: Register user
+      description: Create a new user account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        200:
+          description: User registered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessRegister"
+        400:
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUserValidation"
+
+  /api/auth/login:
+    post:
+      summary: Login user
+      description: Authenticate a user and return a token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        200:
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessLogin"
+        401:
+          description: Invalid credentials.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /api/auth/reset-password:
+    post:
+      summary: Reset password
+      description: Send a reset link to the user's email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+      responses:
+        200:
+          description: Reset email sent.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        404:
+          description: Email not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /api/user/me:
+    get:
+      summary: Get profile
+      description: Returns authenticated user's profile.
+      responses:
+        200:
+          description: Profile retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        401:
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+    put:
+      summary: Update profile
+      description: Update user data and avatar.
+      responses:
+        200:
+          description: Profile updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        400:
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUserValidation"
+
+  /api/activities:
+    get:
+      summary: List activities
+      description: Returns user activity list with filters & sorting.
+      responses:
+        200:
+          description: Activity list retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityShort"
+        401:
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+    post:
+      summary: Create activity
+      description: Save user physical activity with GPS track.
+      responses:
+        200:
+          description: Activity created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityDetail"
+        400:
+          description: Invalid activity data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUserValidation"
+
+  /api/activities/{id}:
+    get:
+      summary: Get activity details
+      description: Returns full information about selected activity.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        200:
+          description: Activity details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityDetail"
+        404:
+          description: Activity not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+    delete:
+      summary: Delete activity
+      description: Delete user's own activity.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        200:
+          description: Activity deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /api/activities/{id}/export:
+    get:
+      summary: Export GPX file
+      description: Returns a GPX file URL for activity.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        200:
+          description: GPX export successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      gpx_url: { type: string }
+        500:
+          description: Export failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /api/ranking:
+    get:
+      summary: Get ranking
+      description: Weekly leaderboard of users.
+      responses:
+        200:
+          description: Ranking retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RankingEntry"
+        500:
+          description: Ranking unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /api/admin/login:
+    post:
+      summary: Admin login
+      description: Authenticate administrator account.
+      responses:
+        200:
+          description: Admin logged in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLogin"
+        401:
+          description: Invalid admin credentials.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /api/admin/users:
+    get:
+      summary: Admin list users
+      description: Returns list of all users.
+      responses:
+        200:
+          description: Users retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+        401:
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /api/admin/activities:
+    get:
+      summary: Admin list activities
+      description: Returns list of all activities with filtering.
+      responses:
+        200:
+          description: Activities retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityShort"
+        400:
+          description: Invalid filters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUserValidation"
+
+  /api/admin/activities/{id}:
+    delete:
+      summary: Admin delete activity
+      description: Remove an activity from database.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        200:
+          description: Activity removed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        404:
+          description: Activity not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /api/admin/stats:
+    get:
+      summary: Global statistics
+      description: Returns system-wide statistics.
+      responses:
+        200:
+          description: Statistics retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
+        500:
+          description: Stats unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+
+components:
+  schemas:
+
+    SuccessMessage:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+
+    ErrorMessage:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string }
+
+    ErrorUserValidation:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string }
+        errors:
+          type: object
+          properties:
+            email: { type: string }
+            password: { type: string }
+
+    SuccessRegister:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            user_id: { type: integer }
+            email: { type: string }
+
+    SuccessLogin:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            token: { type: string }
+            user:
+              $ref: "#/components/schemas/UserProfile"
+
+    UserProfile:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            id: { type: integer }
+            first_name: { type: string }
+            last_name: { type: string }
+            height: { type: number }
+            weight: { type: number }
+
+    ActivityShort:
+      type: object
+      properties:
+        id: { type: integer }
+        type: { type: string }
+        distance: { type: number }
+        duration: { type: number }
+
+    ActivityDetail:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            id: { type: integer }
+            type: { type: string }
+            distance: { type: number }
+            duration: { type: number }
+            gps_track:
+              type: array
+              items:
+                type: array
+                items: { type: number }
+
+    RankingEntry:
+      type: object
+      properties:
+        user_id: { type: integer }
+        name: { type: string }
+        weekly_distance: { type: number }
+
+    AdminLogin:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            token: { type: string }
+
+    AdminUser:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string }
+
+    Stats:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            users: { type: integer }
+            activities: { type: integer }
+            total_distance: { type: number }
