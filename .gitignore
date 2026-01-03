@@ -18,6 +18,7 @@
 /storage/*.key
 /storage/pail
 /vendor
+data/
 logs/
 nginx.pid
 *.log

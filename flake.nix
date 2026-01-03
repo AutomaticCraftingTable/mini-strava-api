@@ -14,9 +14,10 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            php82
-            php82Packages.composer
+            php84
+            php84Packages.composer
             laravel
+            mailpit
           ];
  
           shellHook = ''
