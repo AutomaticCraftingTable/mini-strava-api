@@ -23,4 +23,18 @@ class UserController extends Controller
 
         return response()->json($user);
     }
+
+    public function stats(Request $request)
+    {
+        $stats = $request->user()->activities()
+            ->toBase()
+            ->selectRaw('count(*) as activities_number, sum(distance) as distance_total, avg(speed) as speed_avg')
+            ->first();
+
+        return response()->json([
+            'activities_number' => (int) $stats->activities_number,
+            'distance_total' => (float) $stats->distance_total,
+            'speed_avg' => (float) $stats->speed_avg,
+        ]);
+    }
 }

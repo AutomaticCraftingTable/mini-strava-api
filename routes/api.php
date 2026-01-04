@@ -16,6 +16,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 Route::middleware('auth:sanctum')->put('/user', [UserController::class, 'update'])->name('auth.user.update');
+Route::middleware('auth:sanctum')->get('/user/stats', [UserController::class, 'stats'])->name('user.stats');
 
 Route::prefix('auth')->group(function () {
     Route::name('auth.')->group(function () {
