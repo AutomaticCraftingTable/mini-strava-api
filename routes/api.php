@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\ActivityController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -38,3 +39,12 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 
 Route::middleware('auth:sanctum')->post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
     ->name('verification.send');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
+    Route::get('/activities/export', [ActivityController::class, 'exportAll'])->name('activities.export_all');
+    Route::post('/activity', [ActivityController::class, 'store'])->name('activities.store');
+    Route::get('/activities/{id}', [ActivityController::class, 'show'])->name('activities.show');
+    Route::get('/activities/{id}/export', [ActivityController::class, 'export'])->name('activities.export');
+    Route::delete('/activities/{id}', [ActivityController::class, 'destroy'])->name('activities.destroy');
+});
