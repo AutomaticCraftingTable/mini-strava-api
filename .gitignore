@@ -19,7 +19,6 @@
 /storage/pail
 /vendor
 data/
-logs/
 nginx.pid
 *.log
 Homestead.json
