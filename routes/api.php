@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->put('/user', [UserController::class, 'update'])->name('auth.user.update');
 
 Route::prefix('auth')->group(function () {
     Route::name('auth.')->group(function () {

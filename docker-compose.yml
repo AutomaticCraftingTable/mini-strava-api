@@ -13,7 +13,7 @@ services:
     working_dir: /workspace
     stdin_open: true
     tty: true
-    restart: no
+    restart: unless-stopped
 
   mailpit:
     image: axllent/mailpit
