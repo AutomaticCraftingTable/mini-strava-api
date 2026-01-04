@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\RankingController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -47,4 +48,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/activities/{id}', [ActivityController::class, 'show'])->name('activities.show');
     Route::get('/activities/{id}/export', [ActivityController::class, 'export'])->name('activities.export');
     Route::delete('/activities/{id}', [ActivityController::class, 'destroy'])->name('activities.destroy');
+    Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
 });
