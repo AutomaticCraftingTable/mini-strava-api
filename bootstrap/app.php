@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,10 +20,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (Exception $e, Request $request) {
             function get_status_code(Exception $e)
             {
+                if ($e instanceof AuthenticationException) {
+                    return 401;
+                }
                 if (method_exists($e, 'getStatusCode')) {
                     return $e->getStatusCode();
                 }
-                return 500;
+                return 400;
             }
             return response()->json([
                 'status_code' => get_status_code($e),
