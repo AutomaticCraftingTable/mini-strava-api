@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
@@ -17,3 +18,10 @@ Route::get('/html', function () {
 
 Route::post('/register', [RegisterController::class, 'register'])->name('register');
 Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+Route::get('/auth/reset-password', function (Request $request) {
+    return view('reset-password', [
+        'token' => $request->query('token'),
+        'email' => $request->query('email'),
+    ]);
+})->name('password.reset');
