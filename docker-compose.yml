@@ -1,4 +1,10 @@
 services:
+  nix:
+    image: nixos/nix:latest
+    volumes:
+        - ./:/workspace
+    working_dir: /workspace
+    command: nix develop path:/workspace --extra-experimental-features "nix-command flakes" --command composer setup
   nginx:
     build: 
       context: .
