@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\RankingController;
 
@@ -50,4 +51,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/activities/{id}/export', [ActivityController::class, 'export'])->name('activities.export');
     Route::delete('/activities/{id}', [ActivityController::class, 'destroy'])->name('activities.destroy');
     Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
+});
+
+Route::prefix('admin')->group(function () {
+    Route::post('/auth/login', [AdminLoginController::class, 'login'])->name('admin.auth.login');
+
+    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+        Route::get('/', function () {
+            return ['message' => 'Welcome to the Admin Panel'];
+        });
+    });
 });
