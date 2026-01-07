@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         // 1. Create Roles and Admin first
         $this->call([
             AdminUserSeeder::class,
+            RankingSeeder::class,
         ]);
 
         // 2. Create Test User

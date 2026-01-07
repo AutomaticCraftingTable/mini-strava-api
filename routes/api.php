@@ -10,8 +10,12 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
+use App\Http\Controllers\Admin\StatsController as AdminStatsController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\RankingController;
+use Spatie\Permission\Middleware\RoleMiddleware;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -56,9 +60,14 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('admin')->group(function () {
     Route::post('/auth/login', [AdminLoginController::class, 'login'])->name('admin.auth.login');
 
-    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::middleware(['auth:sanctum', RoleMiddleware::class . ':admin'])->group(function () {
         Route::get('/', function () {
             return ['message' => 'Welcome to the Admin Panel'];
         });
+
+        Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::get('/activities', [AdminActivityController::class, 'index'])->name('admin.activities.index');
+        Route::delete('/activities/{id}', [AdminActivityController::class, 'destroy'])->name('admin.activities.destroy');
+        Route::get('/stats', [AdminStatsController::class, 'index'])->name('admin.stats.index');
     });
 });
