@@ -1,0 +1,1261 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Activity Tracking API",
+    "description": "API for managing user activities, authentication, and rankings",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "API Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User authentication endpoints"
+    },
+    {
+      "name": "User",
+      "description": "User profile management"
+    },
+    {
+      "name": "Activities",
+      "description": "Activity tracking and management"
+    },
+    {
+      "name": "Stats",
+      "description": "Statistics and rankings"
+    },
+    {
+      "name": "Admin",
+      "description": "Administrative endpoints"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password", "password_confirmation"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "haxi"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "haxi@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "0392458994t3"
+                  },
+                  "password_confirmation": {
+                    "type": "string",
+                    "example": "0392458994t3"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/UserBasic"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "2|9muYuL75gsuBxNn2VCiePtGIsWJphFTst6iaa9eQ0f8d19d5"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "haxi@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "0392458994t3"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "2|9muYuL75gsuBxNn2VCiePtGIsWJphFTst6iaa9eQ0f8d19d5"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Logout user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User successfully logged out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Logged out."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/send-reset-password-email": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Send password reset email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "haxi@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset email sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "We have emailed your password reset link."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Get current user profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["User"],
+        "summary": "Update user profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "surname": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "birthdate": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "1990-05-15"
+                  },
+                  "gender": {
+                    "type": "string",
+                    "example": "male"
+                  },
+                  "height": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 185.5
+                  },
+                  "weight": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 82.0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activities": {
+      "post": {
+        "tags": ["Activities"],
+        "summary": "Create a new activity",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "activity_type"],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Morning Run"
+                  },
+                  "note": {
+                    "type": "string",
+                    "example": "Feeling good today!"
+                  },
+                  "activity_type": {
+                    "type": "string",
+                    "example": "run"
+                  },
+                  "distance": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 5200.5
+                  },
+                  "time": {
+                    "type": "integer",
+                    "example": 1800
+                  },
+                  "pace": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 5.45
+                  },
+                  "speed": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 10.5
+                  },
+                  "track": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/TrackPoint"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activity created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Activity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Activities"],
+        "summary": "Get all activities for current user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of activities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Activity"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activities/{id}": {
+      "get": {
+        "tags": ["Activities"],
+        "summary": "Get a specific activity",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activity details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Activity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Activities"],
+        "summary": "Delete an activity",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activity deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Activity deleted."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Activity not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Couldn't delete activity. Activity with id {id} not found."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activities/{id}/export": {
+      "get": {
+        "tags": ["Activities"],
+        "summary": "Export a specific activity as GPX",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "GPX file",
+            "content": {
+              "application/gpx+xml": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activities/export": {
+      "get": {
+        "tags": ["Activities"],
+        "summary": "Export all activities as GPX",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "GPX file with all activities",
+            "content": {
+              "application/gpx+xml": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ranking": {
+      "get": {
+        "tags": ["Stats"],
+        "summary": "Get weekly distance ranking",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranking list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RankingEntry"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/stats": {
+      "get": {
+        "tags": ["Stats"],
+        "summary": "Get current user statistics",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/stats": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get admin statistics",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/activities": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get all activities from all users (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all activities with user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActivityWithUser"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get all users (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserProfile"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/auth/login": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Admin login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "admin@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "admin"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin successfully logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "2|ZnOOMfPDeAKxi0oVofomnoFLbggxnEy9eWa8Ly2c2a5539fe"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status_code": {
+            "type": "integer",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "example": "The name field is required."
+          }
+        }
+      },
+      "UserBasic": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 2
+          },
+          "name": {
+            "type": "string",
+            "example": "haxi"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "haxi@example.com"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-03T23:43:45.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-03T23:43:45.000000Z"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 2
+          },
+          "name": {
+            "type": "string",
+            "example": "haxi"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "haxi@example.com"
+          },
+          "email_verified_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2026-01-04T01:49:29.000000Z"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T01:49:07.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-03T23:43:45.000000Z"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "John"
+          },
+          "surname": {
+            "type": "string",
+            "nullable": true,
+            "example": "Doe"
+          },
+          "birthdate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "1990-05-15T00:00:00.000000Z"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true,
+            "example": "male"
+          },
+          "height": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "example": 185.5
+          },
+          "weight": {
+            "type": "number",
+            "format": "float",
+            "nullable": true,
+            "example": 82
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "haxtwo@example.com"
+          },
+          "email_verified_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T17:07:03.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T17:14:49.000000Z"
+          }
+        }
+      },
+      "TrackPoint": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "float",
+            "example": 40.7128
+          },
+          "longitude": {
+            "type": "number",
+            "format": "float",
+            "example": -74.0060
+          }
+        }
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "activity_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "latitude": {
+            "type": "number",
+            "format": "float",
+            "example": 40.7128
+          },
+          "longitude": {
+            "type": "number",
+            "format": "float",
+            "example": -74.006
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T18:53:22.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T18:53:22.000000Z"
+          }
+        }
+      },
+      "Activity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "Morning Run"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true,
+            "example": "Feeling good today!"
+          },
+          "activity_type": {
+            "type": "string",
+            "example": "run"
+          },
+          "distance": {
+            "type": "number",
+            "format": "float",
+            "example": 5200.5
+          },
+          "time": {
+            "type": "integer",
+            "example": 1800
+          },
+          "pace": {
+            "type": "number",
+            "format": "float",
+            "example": 5.45
+          },
+          "speed": {
+            "type": "number",
+            "format": "float",
+            "example": 10.5
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T18:53:22.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T18:53:22.000000Z"
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Position"
+            }
+          }
+        }
+      },
+      "ActivityWithUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 7
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 4
+          },
+          "title": {
+            "type": "string",
+            "example": "Charlie's Activity #1"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true,
+            "example": "Seeded for ranking test"
+          },
+          "activity_type": {
+            "type": "string",
+            "example": "run"
+          },
+          "distance": {
+            "type": "number",
+            "format": "float",
+            "example": 6.75
+          },
+          "time": {
+            "type": "integer",
+            "example": 1849
+          },
+          "pace": {
+            "type": "number",
+            "format": "float",
+            "example": 5.3
+          },
+          "speed": {
+            "type": "number",
+            "format": "float",
+            "example": 11.5
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T17:00:00.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-01-04T17:00:00.000000Z"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserProfile"
+          }
+        }
+      },
+      "RankingEntry": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Alice"
+          },
+          "surname": {
+            "type": "string",
+            "nullable": true,
+            "example": "Racer"
+          },
+          "week_distance": {
+            "type": "number",
+            "format": "float",
+            "example": 30.11
+          }
+        }
+      },
+      "UserStats": {
+        "type": "object",
+        "properties": {
+          "activities_number": {
+            "type": "integer",
+            "example": 2
+          },
+          "distance_total": {
+            "type": "number",
+            "format": "float",
+            "example": 10401
+          },
+          "speed_avg": {
+            "type": "number",
+            "format": "float",
+            "example": 10.5
+          }
+        }
+      },
+      "AdminStats": {
+        "type": "object",
+        "properties": {
+          "users_number": {
+            "type": "integer",
+            "example": 6
+          },
+          "activities": {
+            "type": "integer",
+            "example": 12
+          },
+          "distance_summary": {
+            "type": "number",
+            "format": "float",
+            "example": 98.87
+          }
+        }
+      }
+    }
+  }
+}

@@ -12,8 +12,8 @@ Route::get('/', function () {
 });
 
 // TODO: remove
-Route::get('/html', function () {
-    return response()->view('example')->header('Content-Type', 'text/html');
+Route::get('/documentation', function () {
+    return response()->view('openapi')->header('Content-Type', 'text/html');
 });
 
 Route::post('/register', [RegisterController::class, 'register'])->name('register');
